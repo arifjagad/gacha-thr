@@ -15,6 +15,7 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const shareRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const generateImage = async () => {
     if (!shareRef.current) return;
@@ -22,11 +23,29 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
     setIsGenerating(true);
     
     try {
-      const canvas = await html2canvas(shareRef.current, {
+      // Create a temporary clone of the content with fixed width for export
+      const tempContainer = document.createElement('div');
+      tempContainer.innerHTML = shareRef.current.outerHTML;
+      const tempElement = tempContainer.firstChild as HTMLElement;
+      
+      // Set fixed width for the clone
+      tempElement.style.width = '576px';
+      tempElement.style.maxWidth = '576px';
+      
+      // Hide the temp element but add to DOM for rendering
+      tempElement.style.position = 'absolute';
+      tempElement.style.left = '-9999px';
+      document.body.appendChild(tempElement);
+      
+      // Generate canvas from the temp element
+      const canvas = await html2canvas(tempElement, {
         scale: 2,
         backgroundColor: null,
         logging: false
       });
+      
+      // Remove temp element
+      document.body.removeChild(tempElement);
       
       const image = canvas.toDataURL('image/png');
       setGeneratedImage(image);
@@ -67,7 +86,8 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
       exit={{ opacity: 0 }}
     >
       <motion.div 
-        className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden"
+        ref={containerRef}
+        className="bg-white rounded-lg shadow-xl w-full max-w-xl overflow-hidden"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
@@ -86,7 +106,7 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
           <div className="mb-6 overflow-hidden rounded-lg border border-gray-200">
             <div 
               ref={shareRef}
-              className="p-6 bg-gradient-to-br from-primary-light to-primary"
+              className="p-6 bg-gradient-to-br from-primary-light to-primary w-full"
             >
               <div className="bg-white bg-opacity-95 rounded-lg p-6 shadow-lg">
                 <div className="text-center mb-6">
@@ -124,7 +144,7 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
                     </tbody>
                   </table>
                 </div>
-
+                
                 <div className="flex items-center">
                   <img 
                     src="/ketupat-icon.svg" 
