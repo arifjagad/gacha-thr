@@ -110,7 +110,7 @@ const RecipientModal: React.FC<RecipientModalProps> = ({
               {error && (
                 <p className="mt-2 text-sm text-red-500">{error}</p>
               )}
-              <p className="mt-2 text-sm text-gray-500">
+              <p className="mt-2 text-sm text-red-500">
                 Setiap orang hanya boleh menerima THR satu kali.
               </p>
             </div>

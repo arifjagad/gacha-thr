@@ -32,6 +32,35 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
       tempElement.style.width = '576px';
       tempElement.style.maxWidth = '576px';
       
+      // Apply margin-top to specific table header elements
+      const tableHeaders = ['nama-penerima', 'jumlah-thr'];
+      tableHeaders.forEach(id => {
+        const element = tempElement.querySelector(`#${id}`);
+        if (element instanceof HTMLElement) {
+          element.style.paddingBottom = '20px';
+        }
+      });
+      
+      // Apply margin-top to dynamic recipient row elements
+      sortedRecipients.forEach((_, index) => {
+        const nameElement = tempElement.querySelector(`#nama-penerima-key-${index}`);
+        const amountElement = tempElement.querySelector(`#jumlah-thr-key-${index}`);
+        
+        if (nameElement instanceof HTMLElement) {
+          nameElement.style.paddingBottom = '20px';
+        }
+        
+        if (amountElement instanceof HTMLElement) {
+          amountElement.style.paddingBottom = '20px';
+        }
+      });
+      
+      // Apply margin-top to total-penerima element
+      const totalElement = tempElement.querySelector('#total-penerima');
+      if (totalElement instanceof HTMLElement) {
+        totalElement.style.marginTop = '-14px';
+      }
+      
       // Hide the temp element but add to DOM for rendering
       tempElement.style.position = 'absolute';
       tempElement.style.left = '-9999px';
@@ -125,8 +154,8 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
                   <table className="w-full">
                     <thead>
                       <tr className="bg-primary bg-opacity-10">
-                        <th className="px-4 py-2 text-left text-primary-dark">Nama</th>
-                        <th className="px-4 py-2 text-right text-primary-dark">Jumlah THR</th>
+                        <th className="px-4 py-2 text-left text-primary-dark" id="nama-penerima">Nama</th>
+                        <th className="px-4 py-2 text-right text-primary-dark" id="jumlah-thr">Jumlah THR</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -135,8 +164,10 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
                           key={index}
                           className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} border-b border-gray-100`}
                         >
-                          <td className="px-4 py-3 font-medium">{recipient.name}</td>
-                          <td className="px-4 py-3 text-right font-medium">
+                          <td className="px-4 py-3 font-medium" id={`nama-penerima-key-${index}`}>
+                            {recipient.name}
+                          </td>
+                          <td className="px-4 py-3 text-right font-medium" id={`jumlah-thr-key-${index}`}>
                             {formatCurrency(recipient.amount)}
                           </td>
                         </tr>
@@ -151,12 +182,12 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
                     alt="Ketupat" 
                     className="w-10 h-10 mr-2"
                   />
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500" id="total-penerima">
                     Total Penerima: {recipients.length}
                   </span>
                 </div>
                 <p className="text-xs text-gray-400 text-center mt-4">
-                  THR Gacha App © {new Date().getFullYear()}
+                  THR Gacha © {new Date().getFullYear()}
                 </p>
               </div>
             </div>
