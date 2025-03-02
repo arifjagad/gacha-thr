@@ -7,7 +7,7 @@ export const performGachaRoll = (rates: THRRate[]) => {
   // Validate total rate is 100%
   const totalRate = rates.reduce((sum, rate) => sum + rate.rate, 0);
   if (totalRate !== 100) {
-    console.error('Rates do not add up to 100%');
+    // console.error('Rates do not add up to 100%');
     // Return the first rate as a fallback
     return rates[0];
   }
@@ -20,13 +20,13 @@ export const performGachaRoll = (rates: THRRate[]) => {
   for (const rate of rates) {
     currentTotal += rate.rate;
     if (rand <= currentTotal) {
-      console.log(`Rolled: ${rand}, landed on: ${rate.amount} (${rate.rate}%)`);
+      // console.log(`Rolled: ${rand}, landed on: ${rate.amount} (${rate.rate}%)`);
       return rate;
     }
   }
   
   // This should never happen if rates total 100%, but just in case
-  console.error('No rate selected in gacha roll, returning first rate');
+  // console.error('No rate selected in gacha roll, returning first rate');
   return rates[0];
 };
 
