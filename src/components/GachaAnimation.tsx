@@ -33,7 +33,7 @@ const GachaAnimation: React.FC<GachaAnimationProps> = ({
       // Show the result after a delay
       timer = setTimeout(() => {
         setShowResult(true);
-        console.log("Setting showResult to true");
+        // console.log("Setting showResult to true");
       }, 2000); // 2 seconds of animation before showing result
     }
     
@@ -50,7 +50,7 @@ const GachaAnimation: React.FC<GachaAnimationProps> = ({
       // Trigger completion callback after showing result for a while
       timer = setTimeout(() => {
         setAnimationComplete(true);
-        console.log("Animation complete, calling onComplete");
+        // console.log("Animation complete, calling onComplete");
         onComplete();
       }, 3000); // 3 seconds to show the result before completing
     }
