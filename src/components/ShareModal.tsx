@@ -111,7 +111,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
               <div className="mb-6">
                 <p className="text-gray-600 mb-4">
                   Buat ID unik untuk berbagi THR Gacha ini dengan orang lain. 
-                  Mereka akan dapat melihat konfigurasi dan hasil THR yang telah dibagikan.
+                  Mereka dapat melakukan gacha THR di link yang kamu bagikan.
                 </p>
                 
                 <div className="mb-4">

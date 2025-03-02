@@ -102,39 +102,39 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ recipients }) => {
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50">
-              <th className="px-4 py-3 text-left">
+              <th className="px-4 py-2.5 text-left whitespace-nowrap w-1/3">
                 <button 
                   className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
                   onClick={() => handleSort('name')}
                 >
-                  <User size={16} className="mr-1" />
+                  <User size={15} className="mr-1.5" />
                   Nama
                   {sortField === 'name' && (
-                    <ArrowUpDown size={14} className="ml-1" />
+                    <ArrowUpDown size={12} className="ml-1" />
                   )}
                 </button>
               </th>
-              <th className="px-4 py-3 text-left">
+              <th className="px-4 py-2.5 text-left whitespace-nowrap w-1/4">
                 <button 
                   className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
                   onClick={() => handleSort('amount')}
                 >
-                  <Wallet size={16} className="mr-1" />
+                  <Wallet size={15} className="mr-1.5" />
                   Jumlah
                   {sortField === 'amount' && (
-                    <ArrowUpDown size={14} className="ml-1" />
+                    <ArrowUpDown size={12} className="ml-1" />
                   )}
                 </button>
               </th>
-              <th className="px-4 py-3 text-left">
+              <th className="px-4 py-2.5 text-left whitespace-nowrap w-2/5">
                 <button 
                   className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
                   onClick={() => handleSort('timestamp')}
                 >
-                  <Calendar size={16} className="mr-1" />
+                  <Calendar size={15} className="mr-1.5" />
                   Waktu
                   {sortField === 'timestamp' && (
-                    <ArrowUpDown size={14} className="ml-1" />
+                    <ArrowUpDown size={12} className="ml-1" />
                   )}
                 </button>
               </th>
@@ -153,17 +153,19 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ recipients }) => {
                 }`}
                 variants={item}
               >
-                <td className="px-4 py-3">
-                  <div className="font-medium text-gray-900">
-                    {recipient.name}
+                <td className="px-4 py-2.5 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <span className="font-medium text-gray-900 truncate max-w-[180px]">
+                      {recipient.name}
+                    </span>
                     {recipient.amount === highestAmount && (
-                      <span className="ml-2 text-xs bg-gold text-primary-dark px-2 py-0.5 rounded-full">
+                      <span className="ml-2 text-xs bg-gold text-primary-dark px-2 py-0.5 rounded-full whitespace-nowrap">
                         Terhoki!
                       </span>
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-2.5 whitespace-nowrap">
                   <span className={`font-medium ${
                     recipient.amount === highestAmount 
                       ? 'text-primary-dark' 
@@ -172,7 +174,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ recipients }) => {
                     {formatCurrency(recipient.amount)}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-500">
+                <td className="px-4 py-2.5 text-sm text-gray-500 whitespace-nowrap">
                   {formatDate(recipient.timestamp)}
                 </td>
               </motion.tr>
