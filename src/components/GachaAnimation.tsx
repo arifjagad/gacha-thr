@@ -131,7 +131,7 @@ const GachaAnimation: React.FC<GachaAnimationProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              Hoki Kamu Hari Ini!
+              THR Kamu Hari Ini!
             </motion.p>
           </motion.div>
         )}

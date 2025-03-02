@@ -46,9 +46,27 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
     }
   };
 
-  const handleRateChange = (id: string, field: 'amount' | 'rate', value: number) => {
+  // Handle input change for rate field
+  const handleRateChange = (id: string, value: string) => {
+    // Remove non-digit and non-decimal characters
+    const cleanValue = value.replace(/[^\d.]/g, '');
+    // Convert to number, allowing empty string to be interpreted as 0
+    const numValue = cleanValue === '' ? 0 : parseFloat(cleanValue);
+    
     setRates(rates.map(rate => 
-      rate.id === id ? { ...rate, [field]: value } : rate
+      rate.id === id ? { ...rate, rate: numValue } : rate
+    ));
+  };
+
+  // Handle input change for amount field
+  const handleAmountChange = (id: string, value: string) => {
+    // Remove any non-digit characters
+    const cleanValue = value.replace(/\D/g, '');
+    // Convert to number, allowing empty string to be interpreted as 0
+    const numValue = cleanValue === '' ? 0 : parseInt(cleanValue);
+    
+    setRates(rates.map(rate => 
+      rate.id === id ? { ...rate, amount: numValue } : rate
     ));
   };
 
@@ -85,7 +103,7 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
             </button>
           </div>
           
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Jumlah Free Roll per Penerima
             </label>
@@ -96,7 +114,7 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
               onChange={(e) => setFreeRolls(Math.max(1, parseInt(e.target.value) || 1))}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
             />
-          </div>
+          </div> */}
           
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
@@ -109,28 +127,31 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
               </button>
             </div>
             
-            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
               {rates.map((rate) => (
                 <div key={rate.id} className="flex items-center space-x-2">
                   <div className="flex-1">
                     <label className="block text-xs text-gray-500 mb-1">Jumlah (Rp)</label>
                     <input
-                      type="number"
-                      min="0"
-                      value={rate.amount}
-                      onChange={(e) => handleRateChange(rate.id, 'amount', parseInt(e.target.value) || 0)}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={rate.amount === 0 ? "" : rate.amount}
+                      onChange={(e) => handleAmountChange(rate.id, e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      placeholder="0"
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                     />
                   </div>
                   <div className="flex-1">
                     <label className="block text-xs text-gray-500 mb-1">Persentase (%)</label>
                     <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      value={rate.rate}
-                      onChange={(e) => handleRateChange(rate.id, 'rate', parseFloat(e.target.value) || 0)}
+                      type="text"
+                      inputMode="decimal"
+                      value={rate.rate === 0 ? "" : rate.rate}
+                      onChange={(e) => handleRateChange(rate.id, e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      placeholder="0"
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                     />
                   </div>
