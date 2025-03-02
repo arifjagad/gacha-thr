@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '../utils/gacha';
+import { Gift } from 'lucide-react';
 
 interface GachaAnimationProps {
   isRolling: boolean;
@@ -14,133 +15,125 @@ const GachaAnimation: React.FC<GachaAnimationProps> = ({
   onComplete 
 }) => {
   const [showResult, setShowResult] = useState(false);
-  const [moneyElements, setMoneyElements] = useState<JSX.Element[]>([]);
+  const [animationComplete, setAnimationComplete] = useState(false);
 
-  // Create money rain effect when result is shown
+  // Reset states when isRolling changes
   useEffect(() => {
-    if (result !== null && !isRolling) {
-      const timeout = setTimeout(() => {
-        setShowResult(true);
-        
-        // Create money rain elements
-        const newMoneyElements = [];
-        const count = Math.min(50, Math.max(10, Math.floor(result / 10000)));
-        
-        for (let i = 0; i < count; i++) {
-          const duration = 3 + Math.random() * 4;
-          const delay = Math.random() * 3;
-          const leftPos = Math.random() * 100;
-          const size = 20 + Math.random() * 20;
-          
-          newMoneyElements.push(
-            <div 
-              key={i}
-              className="money"
-              style={{
-                left: `${leftPos}%`,
-                width: `${size}px`,
-                height: `${size / 2}px`,
-                animation: `fall ${duration}s linear ${delay}s`,
-              }}
-            />
-          );
-        }
-        
-        setMoneyElements(newMoneyElements);
-        
-        // Cleanup after animation
-        const resultTimeout = setTimeout(() => {
-          onComplete();
-          setShowResult(false);
-          setMoneyElements([]);
-        }, 5000);
-        
-        return () => clearTimeout(resultTimeout);
-      }, 3000);
-      
-      return () => clearTimeout(timeout);
+    if (isRolling) {
+      setShowResult(false);
+      setAnimationComplete(false);
     }
-  }, [result, isRolling, onComplete]);
+  }, [isRolling]);
+
+  // When rolling stops, show the result
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (isRolling && result !== null) {
+      // Show the result after a delay
+      timer = setTimeout(() => {
+        setShowResult(true);
+        console.log("Setting showResult to true");
+      }, 2000); // 2 seconds of animation before showing result
+    }
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isRolling, result]);
+
+  // When result is shown, wait for a while and call onComplete
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (showResult && result !== null && !animationComplete) {
+      // Trigger completion callback after showing result for a while
+      timer = setTimeout(() => {
+        setAnimationComplete(true);
+        console.log("Animation complete, calling onComplete");
+        onComplete();
+      }, 3000); // 3 seconds to show the result before completing
+    }
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [showResult, result, onComplete, animationComplete]);
+
+  if (!isRolling && !result) return null;
 
   return (
-    <div className="relative w-full h-64 flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center py-8">
       <AnimatePresence>
-        {isRolling && (
+        {isRolling && !showResult && (
           <motion.div
-            className="absolute"
-            initial={{ opacity: 1 }}
+            className="text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="w-40 h-40 bg-white rounded-lg shadow-lg flex items-center justify-center overflow-hidden relative"
-              animate={{ 
-                rotate: [0, 360, 720, 1080, 1440, 1800],
-                scale: [1, 1.1, 1, 1.1, 1]
-              }}
+              className="w-32 h-32 bg-primary-light rounded-full flex items-center justify-center mb-4 mx-auto"
+              animate={{ rotate: 360 }}
               transition={{ 
-                duration: 3,
-                ease: "easeInOut",
-                times: [0, 0.2, 0.4, 0.6, 0.8, 1]
+                repeat: Infinity, 
+                duration: 1,
+                ease: "linear"
               }}
             >
-              <div className="w-full h-full absolute">
-                <div className="absolute inset-0 ketupat-pattern opacity-30"></div>
-              </div>
-              <img 
-                src="/ketupat-icon.svg" 
-                alt="Ketupat" 
-                className="w-24 h-24 animate-spin-slow"
-              />
+              <Gift size={64} className="text-primary" />
             </motion.div>
+            <p className="text-xl text-gray-600">Mengundi THR...</p>
           </motion.div>
         )}
-        
-        {showResult && (
-          <>
-            <div className="money-rain">
-              {moneyElements}
-            </div>
-            <motion.div
-              className="absolute"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ 
-                type: "spring",
-                stiffness: 300,
-                damping: 15
-              }}
-            >
-              <motion.div 
-                className="bg-white rounded-lg shadow-lg p-8 text-center"
-                animate={{ 
-                  y: [0, -10, 0, -10, 0],
-                  boxShadow: [
-                    "0 4px 6px rgba(0,0,0,0.1)", 
-                    "0 10px 15px rgba(0,0,0,0.2)",
-                    "0 4px 6px rgba(0,0,0,0.1)",
-                    "0 10px 15px rgba(0,0,0,0.2)",
-                    "0 4px 6px rgba(0,0,0,0.1)"
-                  ]
-                }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
+
+        {showResult && result !== null && (
+          <motion.div
+            className="text-center"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{ type: "spring", damping: 12 }}
+          >
+            <div className="mb-4">
+              <motion.div
+                className="w-48 h-48 bg-gold rounded-full flex items-center justify-center mx-auto relative"
+                initial={{ rotate: 0 }}
+                animate={{ rotate: [0, 15, -15, 10, -10, 5, -5, 0] }}
+                transition={{ duration: 0.8 }}
               >
-                <h3 className="text-xl font-semibold text-primary-dark mb-2">
-                  Selamat!
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Anda mendapatkan THR sebesar:
-                </p>
                 <motion.div
-                  className="text-4xl font-bold text-gold bg-primary-dark px-6 py-3 rounded-lg inline-block"
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: [0.8, 1.2, 1] }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  {result !== null && formatCurrency(result)}
-                </motion.div>
+                  className="absolute inset-0 bg-gold rounded-full"
+                  animate={{ 
+                    boxShadow: [
+                      "0 0 0px 0px rgba(255,215,0,0.3)", 
+                      "0 0 30px 10px rgba(255,215,0,0.6)",
+                      "0 0 0px 0px rgba(255,215,0,0.3)"
+                    ]
+                  }}
+                  transition={{ 
+                    repeat: Infinity,
+                    duration: 2,
+                    ease: "easeInOut"
+                  }}
+                />
+                <div className="z-10">
+                  <p className="text-sm text-primary-dark font-bold mb-1">Selamat!</p>
+                  <p className="text-2xl font-bold text-primary-dark">
+                    {formatCurrency(result)}
+                  </p>
+                </div>
               </motion.div>
-            </motion.div>
-          </>
+            </div>
+            <motion.p 
+              className="text-xl font-medium text-gray-800"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              Hoki Kamu Hari Ini!
+            </motion.p>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

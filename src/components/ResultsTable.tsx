@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpDown, Calendar, User, DollarSign } from 'lucide-react';
+import { ArrowUpDown, Calendar, User, Wallet } from 'lucide-react';
 import { Recipient } from '../types';
 import { formatCurrency } from '../utils/gacha';
 
@@ -43,12 +43,30 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ recipients }) => {
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
+    
+    // Array of Indonesian day names
+    const dayNames = [
+      'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'
+    ];
+    
+    // Array of Indonesian month names
+    const monthNames = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    
+    // Get day name, date, month name, year
+    const dayName = dayNames[date.getDay()];
+    const day = date.getDate();
+    const monthName = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    
+    // Format hours and minutes with leading zeros if needed
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    // Return the formatted date string
+    return `${dayName}, ${day} ${monthName} ${year}, ${hours}:${minutes}`;
   };
 
   const container = {
@@ -101,7 +119,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ recipients }) => {
                   className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
                   onClick={() => handleSort('amount')}
                 >
-                  <DollarSign size={16} className="mr-1" />
+                  <Wallet size={16} className="mr-1" />
                   Jumlah
                   {sortField === 'amount' && (
                     <ArrowUpDown size={14} className="ml-1" />

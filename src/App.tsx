@@ -90,6 +90,7 @@ function App() {
     // Start the gacha roll
     setIsRolling(true);
     const result = performGachaRoll(appState.rates);
+    // console.log('Gacha roll result:', result); // Debug log
     setCurrentResult(result.amount);
     
     // Update app state with the new roll
@@ -101,6 +102,7 @@ function App() {
   
   // Handle gacha roll completion
   const handleRollComplete = () => {
+    // console.log('Roll complete. Current result:', currentResult, 'Current recipient:', currentRecipient); // Debug log
     if (currentResult !== null && currentRecipient) {
       // Add the recipient to the list
       const newRecipient: Recipient = {
