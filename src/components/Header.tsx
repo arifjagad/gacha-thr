@@ -1,19 +1,25 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Gift, Settings, RefreshCw, Share2 } from 'lucide-react';
+import { Gift, Settings, RefreshCw, Share2, Link } from 'lucide-react';
 
 interface HeaderProps {
   onEditRates: () => void;
   onReset: () => void;
   onShare: () => void;
+  onShareLink: () => void;
   hasRecipients: boolean;
+  isShared?: boolean;
+  isViewMode?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
   onEditRates, 
   onReset, 
   onShare,
-  hasRecipients
+  onShareLink,
+  hasRecipients,
+  isShared = false,
+  isViewMode = false
 }) => {
   return (
     <header className="bg-primary text-white shadow-md">
@@ -32,15 +38,38 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
           
-          <div className="flex space-x-2">
-            <button
-              onClick={onEditRates}
-              className="flex items-center px-3 py-2 bg-white bg-opacity-20 rounded-md hover:bg-opacity-30 transition-colors"
-            >
-              <Settings size={18} className="mr-1" />
-              <span className="text-sm">Edit Rates</span>
-            </button>
+          {/* Always render a div to maintain consistent padding/spacing */}
+          <div className="flex flex-wrap gap-2 justify-center">
+            {/* Only show Edit Rates, Share Link, Reset buttons if not in view mode */}
+            {!isViewMode && (
+              <>
+                <button
+                  onClick={onEditRates}
+                  className="flex items-center px-3 py-2 bg-white bg-opacity-20 rounded-md hover:bg-opacity-30 transition-colors"
+                >
+                  <Settings size={18} className="mr-1" />
+                  <span className="text-sm">Edit Rates</span>
+                </button>
+                
+                <button
+                  onClick={onShareLink}
+                  className="flex items-center px-3 py-2 bg-gold text-primary-dark rounded-md hover:bg-opacity-90 transition-colors"
+                >
+                  <Link size={18} className="mr-1" />
+                  <span className="text-sm">{isShared ? 'Link Berbagi' : 'Buat Link'}</span>
+                </button>
+                
+                <button
+                  onClick={onReset}
+                  className="flex items-center px-3 py-2 bg-red bg-opacity-80 rounded-md hover:bg-opacity-100 transition-colors"
+                >
+                  <RefreshCw size={18} className="mr-1" />
+                  <span className="text-sm">Reset</span>
+                </button>
+              </>
+            )}
             
+            {/* Always show Share Image button regardless of mode */}
             <button
               onClick={onShare}
               disabled={!hasRecipients}
@@ -51,15 +80,7 @@ const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <Share2 size={18} className="mr-1" />
-              <span className="text-sm">Share</span>
-            </button>
-            
-            <button
-              onClick={onReset}
-              className="flex items-center px-3 py-2 bg-red bg-opacity-80 rounded-md hover:bg-opacity-100 transition-colors"
-            >
-              <RefreshCw size={18} className="mr-1" />
-              <span className="text-sm">Reset</span>
+              <span className="text-sm">Share Gambar</span>
             </button>
           </div>
         </div>

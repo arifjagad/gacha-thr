@@ -9,9 +9,15 @@ interface ShareImageProps {
   recipients: Recipient[];
   isOpen: boolean;
   onClose: () => void;
+  shareId?: string; // Add shareId prop
 }
 
-const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) => {
+const ShareImage: React.FC<ShareImageProps> = ({ 
+  recipients, 
+  isOpen, 
+  onClose,
+  shareId 
+}) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const shareRef = useRef<HTMLDivElement>(null);
@@ -140,7 +146,7 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
               <div className="bg-white bg-opacity-95 rounded-lg p-6 shadow-lg">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-primary-dark mb-1">
-                    Daftar Penerima THR
+                    {shareId ? `THR Gacha Lebaran - By ${shareId}` : "THR Gacha Lebaran"}
                   </h3>
                   <p className="text-lg font-arabic text-primary">
                     عيد مبارك - Selamat Hari Raya

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-import { Gift } from 'lucide-react';
+import { Gift, AlertTriangle } from 'lucide-react';
 
 // Components
 import ConfigModal from './components/ConfigModal';
@@ -9,6 +9,7 @@ import RecipientModal from './components/RecipientModal';
 import GachaAnimation from './components/GachaAnimation';
 import ResultsTable from './components/ResultsTable';
 import ShareImage from './components/ShareImage';
+import ShareModal from './components/ShareModal';
 import ConfirmationDialog from './components/ConfirmationDialog';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -17,6 +18,7 @@ import Footer from './components/Footer';
 import { AppState, THRRate, Recipient } from './types';
 import { saveState, loadState, resetAllData } from './utils/storage';
 import { performGachaRoll, validateRates } from './utils/gacha';
+import { loadFromSupabase } from './utils/supabase';
 
 const DEFAULT_RATES: THRRate[] = [
   { amount: 10000, rate: 50, id: uuidv4() },
@@ -40,28 +42,76 @@ function App() {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [showRecipientModal, setShowRecipientModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showShareLinkModal, setShowShareLinkModal] = useState(false);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isViewMode, setIsViewMode] = useState(false);  // Add isViewMode state
   
   // Gacha State
   const [isRolling, setIsRolling] = useState(false);
   const [currentResult, setCurrentResult] = useState<number | null>(null);
   const [currentRecipient, setCurrentRecipient] = useState<string>('');
   
-  // Load state from localStorage on initial render
+  // Check for share ID in URL on initial load
   useEffect(() => {
-    const savedState = loadState();
-    if (savedState) {
-      setAppState(savedState);
-    } else {
-      // Show config modal on first visit
-      setShowConfigModal(true);
-    }
+    const checkForShareId = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const shareId = urlParams.get('share');
+      
+      if (shareId) {
+        setIsLoading(true);
+        setLoadError(null);
+        setIsViewMode(true);  // Set view mode to true when loading from a share link
+        
+        try {
+          const sharedData = await loadFromSupabase(shareId);
+          
+          if (sharedData) {
+            setAppState({
+              rates: sharedData.rates,
+              recipients: sharedData.recipients,
+              totalRolls: sharedData.recipients.length,
+              isConfigured: true,
+              initialFreeRolls: 1,
+              shareId: shareId
+            });
+          } else {
+            setLoadError(`Data berbagi dengan ID "${shareId}" tidak ditemukan.`);
+            loadLocalState();
+          }
+        } catch (error) {
+          console.error('Error loading shared data:', error);
+          setLoadError('Terjadi kesalahan saat memuat data berbagi.');
+          setIsViewMode(false);  // Reset view mode on error
+          loadLocalState();
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        loadLocalState();
+      }
+    };
+    
+    const loadLocalState = () => {
+      const savedState = loadState();
+      if (savedState) {
+        setAppState(savedState);
+      } else {
+        // Show config modal on first visit
+        setShowConfigModal(true);
+      }
+    };
+    
+    checkForShareId();
   }, []);
   
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    saveState(appState);
-  }, [appState]);
+    if (!isLoading) {
+      saveState(appState);
+    }
+  }, [appState, isLoading]);
   
   // Handle configuration save
   const handleSaveConfig = (rates: THRRate[], initialFreeRolls: number) => {
@@ -78,7 +128,10 @@ function App() {
   // Handle reset all data
   const handleResetAll = () => {
     resetAllData();
-    setAppState(DEFAULT_STATE);
+    setAppState({
+      ...DEFAULT_STATE,
+      shareId: appState.shareId // Preserve shareId if it exists
+    });
     setShowConfigModal(true);
   };
   
@@ -111,7 +164,6 @@ function App() {
   
   // Handle gacha roll completion
   const handleRollComplete = () => {
-    // console.log('Roll complete. Current result:', currentResult, 'Current recipient:', currentRecipient); // Debug log
     if (currentResult !== null && currentRecipient) {
       // Add the recipient to the list
       const newRecipient: Recipient = {
@@ -171,7 +223,10 @@ function App() {
         onEditRates={() => setShowConfigModal(true)}
         onReset={() => setShowResetConfirmation(true)}
         onShare={() => setShowShareModal(true)}
+        onShareLink={() => setShowShareLinkModal(true)}
         hasRecipients={appState.recipients.length > 0}
+        isShared={!!appState.shareId}
+        isViewMode={isViewMode}  // Pass isViewMode to Header
       />
       
       <main className="flex-grow container mx-auto px-4 py-8 relative overflow-hidden">
@@ -181,105 +236,108 @@ function App() {
         </div>
         
         <div className="max-w-4xl mx-auto">
-          {/* Main Gacha Section */}
-          <motion.div 
-            className="bg-white rounded-lg shadow-lg p-6 mb-8 relative overflow-hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="absolute top-0 left-0 w-full h-full ketupat-pattern opacity-5"></div>
-            
-            <div className="relative">
-              <div className="text-center mb-6">
-                <h1 className="text-3xl font-bold text-primary-dark mb-2">
-                  THR Gacha Lebaran
-                </h1>
-                <p className="text-gray-600">
-                  Aplikasi Gacha THR untuk Pembagian THR Lebaran yang Menyenangkan
-                </p>
+          {/* Loading State */}
+          {isLoading && (
+            <motion.div 
+              className="bg-white rounded-lg shadow-lg p-6 mb-8 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-lg text-gray-600">Memuat data THR Gacha...</p>
               </div>
-              
-              {/* Gacha Animation Area */}
-              <GachaAnimation 
-                isRolling={isRolling}
-                result={currentResult}
-                onComplete={handleRollComplete}
-              />
-              
-              {/* Roll Button */}
-              {!isRolling && !currentResult && (
-                <div className="text-center mt-6">
-                  <motion.button
-                    onClick={() => setShowRecipientModal(true)}
-                    className="px-6 py-3 bg-primary text-white rounded-full text-lg font-semibold shadow-lg hover:bg-primary-dark transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Gift className="inline-block mr-2" size={20} />
-                    Roll THR Gacha
-                  </motion.button>
-                  
-                  {appState.rates.length > 0 && (
-                    <div className="mt-4 text-sm text-gray-500">
-                      <p>Konfigurasi THR Gacha:</p>
-                      <ul className="flex flex-wrap justify-center gap-2 mt-1">
-                        {appState.rates.map((rate) => (
-                          <li 
-                            key={rate.id}
-                            className="bg-gray-100 px-2 py-1 rounded-md"
-                          >
-                            Rp {rate.amount.toLocaleString('id-ID')} - {rate.rate}%
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+            </motion.div>
+          )}
+          
+          {/* Error State */}
+          {loadError && (
+            <motion.div 
+              className="bg-white rounded-lg shadow-lg p-6 mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="flex items-start p-4 bg-red-50 rounded-lg">
+                <AlertTriangle size={24} className="text-red mr-3 mt-0.5" />
+                <div>
+                  <h3 className="text-lg font-semibold text-red">Gagal Memuat Data</h3>
+                  <p className="text-gray-700">{loadError}</p>
                 </div>
-              )}
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+          )}
+          
+          {/* Main Gacha Section */}
+          {!isLoading && (
+            <motion.div 
+              className="bg-white rounded-lg shadow-lg p-6 mb-8 relative overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="absolute top-0 left-0 w-full h-full ketupat-pattern opacity-5"></div>
+              
+              <div className="relative">
+                <div className="text-center mb-6">
+                  <h1 className="text-3xl font-bold text-primary-dark mb-2">
+                  {appState.shareId ? `THR Gacha Lebaran - By ${appState.shareId}` : "THR Gacha Lebaran"}
+                  </h1>
+                  <p className="text-gray-600">
+                    Aplikasi Gacha THR untuk Pembagian THR Lebaran yang Menyenangkan
+                  </p>
+                </div>
+                
+                {/* Gacha Animation Area */}
+                <GachaAnimation 
+                  isRolling={isRolling}
+                  result={currentResult}
+                  onComplete={handleRollComplete}
+                />
+                
+                {/* Roll Button */}
+                {!isRolling && !currentResult && (
+                  <div className="text-center mt-6">
+                    <motion.button
+                      onClick={() => setShowRecipientModal(true)}
+                      className="px-6 py-3 bg-primary text-white rounded-full text-lg font-semibold shadow-lg hover:bg-primary-dark transition-colors"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Gift className="inline-block mr-2" size={20} />
+                      Roll THR Gacha
+                    </motion.button>
+                    
+                    {appState.rates.length > 0 && (
+                      <div className="mt-4 text-sm text-gray-500">
+                        <p>Konfigurasi THR Gacha:</p>
+                        <ul className="flex flex-wrap justify-center gap-2 mt-1">
+                          {appState.rates.map((rate) => (
+                            <li 
+                              key={rate.id}
+                              className="bg-gray-100 px-2 py-1 rounded-md"
+                            >
+                              Rp {rate.amount.toLocaleString('id-ID')} - {rate.rate}%
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
           
           {/* Results Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <ResultsTable recipients={appState.recipients} />
-          </motion.div>
-          
-          {/* SEO Content Section */}
-          {/* <motion.div
-            className="mt-8 bg-white rounded-lg shadow-md p-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <h2 className="text-xl font-bold text-primary-dark mb-3">
-              Tentang THR Gacha
-            </h2>
-            <div className="prose prose-sm text-gray-600">
-              <p>
-                <strong>THR Gacha</strong> adalah aplikasi pembagian THR Lebaran dengan sistem gacha yang menyenangkan.
-                Aplikasi ini membantu Anda mendistribusikan THR secara acak dengan nominal yang bervariasi
-                kepada karyawan, keluarga, atau teman-teman Anda pada momen Lebaran.
-              </p>
-              <p>
-                Cara menggunakan aplikasi <strong>THR Gacha</strong> sangat mudah:
-              </p>
-              <ol className="list-decimal pl-5">
-                <li>Konfigurasi nominal dan persentase THR</li>
-                <li>Masukkan nama penerima THR</li>
-                <li>Klik tombol "Roll THR Gacha"</li>
-                <li>Lihat nominal THR yang didapatkan</li>
-              </ol>
-              <p>
-                <strong>THR Gacha</strong> membuat momen pembagian THR Lebaran menjadi lebih menyenangkan dan mendebarkan.
-                Setiap peserta mendapatkan kesempatan untuk memperoleh nominal THR yang berbeda-beda sesuai keberuntungan mereka.
-              </p>
-            </div>
-          </motion.div> */}
+          {!isLoading && appState.recipients.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <ResultsTable recipients={appState.recipients} />
+            </motion.div>
+          )}
         </div>
       </main>
       
@@ -287,7 +345,7 @@ function App() {
       
       {/* Modals */}
       <AnimatePresence>
-        {showConfigModal && (
+        {showConfigModal && !isViewMode && (
           <ConfigModal 
             isOpen={showConfigModal}
             onClose={() => setShowConfigModal(false)}
@@ -311,10 +369,20 @@ function App() {
             isOpen={showShareModal}
             onClose={() => setShowShareModal(false)}
             recipients={appState.recipients}
+            shareId={appState.shareId}  // Pass the shareId from appState to ShareImage
           />
         )}
         
-        {showResetConfirmation && (
+        {showShareLinkModal && (
+          <ShareModal
+            isOpen={showShareLinkModal}
+            onClose={() => setShowShareLinkModal(false)}
+            rates={appState.rates}
+            recipients={appState.recipients}
+          />
+        )}
+        
+        {showResetConfirmation && !isViewMode && (
           <ConfirmationDialog 
             isOpen={showResetConfirmation}
             onClose={() => setShowResetConfirmation(false)}

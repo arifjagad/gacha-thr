@@ -17,4 +17,5 @@ export interface AppState {
   totalRolls: number;
   isConfigured: boolean;
   initialFreeRolls: number;
+  shareId?: string;
 }
