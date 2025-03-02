@@ -124,22 +124,20 @@ const ShareImage: React.FC<ShareImageProps> = ({ recipients, isOpen, onClose }) 
                     </tbody>
                   </table>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <img 
-                      src="/ketupat-icon.svg" 
-                      alt="Ketupat" 
-                      className="w-10 h-10 mr-2"
-                    />
-                    <span className="text-sm text-gray-500">
-                      Total Penerima: {recipients.length}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    THR Gacha App © {new Date().getFullYear()}
-                  </p>
+
+                <div className="flex items-center">
+                  <img 
+                    src="/ketupat-icon.svg" 
+                    alt="Ketupat" 
+                    className="w-10 h-10 mr-2"
+                  />
+                  <span className="text-sm text-gray-500">
+                    Total Penerima: {recipients.length}
+                  </span>
                 </div>
+                <p className="text-xs text-gray-400 text-center mt-4">
+                  THR Gacha App © {new Date().getFullYear()}
+                </p>
               </div>
             </div>
           </div>
