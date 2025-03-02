@@ -28,8 +28,8 @@ const Footer: React.FC = () => {
     // </footer>
     <footer className="bg-primary-dark text-white py-6">
       <div className="container mx-auto px-4 text-center">
-        <p className="text-xs text-gray-400">
-          THR Gacha App © {new Date().getFullYear()}
+        <p className="text-xs">
+          THR Gacha © {new Date().getFullYear()} - Arifjagad
         </p>
       </div>
     </footer>

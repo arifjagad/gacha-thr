@@ -192,11 +192,11 @@ function App() {
             
             <div className="relative">
               <div className="text-center mb-6">
-                <h2 className="text-3xl font-bold text-primary-dark mb-2">
+                <h1 className="text-3xl font-bold text-primary-dark mb-2">
                   THR Gacha Lebaran
-                </h2>
+                </h1>
                 <p className="text-gray-600">
-                  Dapatkan THR dengan cara yang menyenangkan!
+                  Aplikasi Gacha THR untuk Pembagian THR Lebaran yang Menyenangkan
                 </p>
               </div>
               
@@ -217,12 +217,12 @@ function App() {
                     whileTap={{ scale: 0.95 }}
                   >
                     <Gift className="inline-block mr-2" size={20} />
-                    Roll THR
+                    Roll THR Gacha
                   </motion.button>
                   
                   {appState.rates.length > 0 && (
                     <div className="mt-4 text-sm text-gray-500">
-                      <p>Konfigurasi THR:</p>
+                      <p>Konfigurasi THR Gacha:</p>
                       <ul className="flex flex-wrap justify-center gap-2 mt-1">
                         {appState.rates.map((rate) => (
                           <li 
@@ -248,6 +248,38 @@ function App() {
           >
             <ResultsTable recipients={appState.recipients} />
           </motion.div>
+          
+          {/* SEO Content Section */}
+          {/* <motion.div
+            className="mt-8 bg-white rounded-lg shadow-md p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <h2 className="text-xl font-bold text-primary-dark mb-3">
+              Tentang THR Gacha
+            </h2>
+            <div className="prose prose-sm text-gray-600">
+              <p>
+                <strong>THR Gacha</strong> adalah aplikasi pembagian THR Lebaran dengan sistem gacha yang menyenangkan.
+                Aplikasi ini membantu Anda mendistribusikan THR secara acak dengan nominal yang bervariasi
+                kepada karyawan, keluarga, atau teman-teman Anda pada momen Lebaran.
+              </p>
+              <p>
+                Cara menggunakan aplikasi <strong>THR Gacha</strong> sangat mudah:
+              </p>
+              <ol className="list-decimal pl-5">
+                <li>Konfigurasi nominal dan persentase THR</li>
+                <li>Masukkan nama penerima THR</li>
+                <li>Klik tombol "Roll THR Gacha"</li>
+                <li>Lihat nominal THR yang didapatkan</li>
+              </ol>
+              <p>
+                <strong>THR Gacha</strong> membuat momen pembagian THR Lebaran menjadi lebih menyenangkan dan mendebarkan.
+                Setiap peserta mendapatkan kesempatan untuk memperoleh nominal THR yang berbeda-beda sesuai keberuntungan mereka.
+              </p>
+            </div>
+          </motion.div> */}
         </div>
       </main>
       
