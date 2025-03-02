@@ -145,9 +145,9 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ recipients }) => {
             initial="hidden"
             animate="show"
           >
-            {sortedRecipients.map((recipient, index) => (
+            {sortedRecipients.map((recipient) => (
               <motion.tr 
-                key={`${recipient.name}-${recipient.timestamp}`}
+                key={recipient.timestamp} // Use timestamp as a unique key
                 className={`border-t border-gray-200 hover:bg-gray-50 ${
                   recipient.amount === highestAmount ? 'bg-yellow-50' : ''
                 }`}

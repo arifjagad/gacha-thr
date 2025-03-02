@@ -84,13 +84,22 @@ function App() {
   
   // Handle recipient submission
   const handleRecipientSubmit = (name: string) => {
+    // Check if recipient name already exists
+    const existingRecipient = appState.recipients.find(
+      r => r.name.toLowerCase() === name.toLowerCase()
+    );
+    
+    if (existingRecipient) {
+      // Name already exists, don't proceed
+      return;
+    }
+    
     setCurrentRecipient(name);
     setShowRecipientModal(false);
     
     // Start the gacha roll
     setIsRolling(true);
     const result = performGachaRoll(appState.rates);
-    // console.log('Gacha roll result:', result); // Debug log
     setCurrentResult(result.amount);
     
     // Update app state with the new roll

@@ -19,41 +19,46 @@ const RecipientModal: React.FC<RecipientModalProps> = ({
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [recentRecipients, setRecentRecipients] = useState<string[]>([]);
+  const [alreadyParticipatedNames, setAlreadyParticipatedNames] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    // Get unique recent recipients (last 5, excluding duplicates)
-    const uniqueNames = Array.from(new Set(
-      recipients.map(r => r.name)
-    )).slice(0, 5);
+    // Get unique recent recipients (last 5, excluding those who already participated)
+    const existingNames = new Set(recipients.map(r => r.name.toLowerCase()));
+    setAlreadyParticipatedNames(existingNames);
     
-    setRecentRecipients(uniqueNames);
+    // No need to show recent recipients since we're not allowing repeats
+    setRecentRecipients([]);
   }, [recipients]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    
+    if (!trimmedName) {
       setError('Nama penerima tidak boleh kosong');
       return;
     }
     
-    // Check if this person already has pending free rolls
-    const existingRecipient = recipients.find(
-      r => r.name.toLowerCase() === name.toLowerCase() && r.freeRollsRemaining > 0
-    );
-    
-    if (existingRecipient) {
-      setError(`${name} masih memiliki ${existingRecipient.freeRollsRemaining} free roll tersisa`);
+    // Check if this name has already participated
+    if (alreadyParticipatedNames.has(trimmedName.toLowerCase())) {
+      setError(`${trimmedName} sudah pernah menerima THR`);
       return;
     }
     
-    onSubmit(name.trim());
+    onSubmit(trimmedName);
     setName('');
     setError('');
   };
 
-  const selectRecipient = (recipientName: string) => {
-    setName(recipientName);
+  const checkNameAvailability = (inputName: string) => {
+    const trimmedName = inputName.trim();
+    
+    if (trimmedName && alreadyParticipatedNames.has(trimmedName.toLowerCase())) {
+      setError(`${trimmedName} sudah pernah menerima THR`);
+    } else {
+      setError('');
+    }
   };
 
   if (!isOpen) return null;
@@ -96,34 +101,19 @@ const RecipientModal: React.FC<RecipientModalProps> = ({
                   value={name}
                   onChange={(e) => {
                     setName(e.target.value);
-                    setError('');
+                    checkNameAvailability(e.target.value);
                   }}
                   className="w-full pl-10 p-3 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                   placeholder="Nama Lengkap"
                 />
               </div>
               {error && (
-                <p className="mt-2 text-sm text-red">{error}</p>
+                <p className="mt-2 text-sm text-red-500">{error}</p>
               )}
+              <p className="mt-2 text-sm text-gray-500">
+                Setiap orang hanya boleh menerima THR satu kali.
+              </p>
             </div>
-            
-            {recentRecipients.length > 0 && (
-              <div className="mb-6">
-                <p className="text-sm text-gray-500 mb-2">Penerima Sebelumnya:</p>
-                <div className="flex flex-wrap gap-2">
-                  {recentRecipients.map((recipientName) => (
-                    <button
-                      key={recipientName}
-                      type="button"
-                      onClick={() => selectRecipient(recipientName)}
-                      className="px-3 py-1 bg-primary-light text-primary-dark rounded-full text-sm hover:bg-primary hover:text-white transition-colors"
-                    >
-                      {recipientName}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
             
             <div className="flex justify-end space-x-3">
               <button
@@ -135,7 +125,12 @@ const RecipientModal: React.FC<RecipientModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+                disabled={!!error}
+                className={`px-4 py-2 rounded-md ${
+                  error 
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                    : 'bg-primary text-white hover:bg-primary-dark'
+                }`}
               >
                 Mulai Gacha
               </button>
