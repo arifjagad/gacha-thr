@@ -94,93 +94,96 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ recipients }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="p-4 bg-primary text-white">
+      <div className="p-4 bg-primary text-white sticky top-0 z-10">
         <h3 className="text-xl font-bold">THR Terhoki Tahun Ini</h3>
       </div>
       
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2.5 text-left whitespace-nowrap w-1/3">
-                <button 
-                  className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
-                  onClick={() => handleSort('name')}
-                >
-                  <User size={15} className="mr-1.5" />
-                  Nama
-                  {sortField === 'name' && (
-                    <ArrowUpDown size={12} className="ml-1" />
-                  )}
-                </button>
-              </th>
-              <th className="px-4 py-2.5 text-left whitespace-nowrap w-1/4">
-                <button 
-                  className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
-                  onClick={() => handleSort('amount')}
-                >
-                  <Wallet size={15} className="mr-1.5" />
-                  Jumlah
-                  {sortField === 'amount' && (
-                    <ArrowUpDown size={12} className="ml-1" />
-                  )}
-                </button>
-              </th>
-              <th className="px-4 py-2.5 text-left whitespace-nowrap w-2/5">
-                <button 
-                  className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
-                  onClick={() => handleSort('timestamp')}
-                >
-                  <Calendar size={15} className="mr-1.5" />
-                  Waktu
-                  {sortField === 'timestamp' && (
-                    <ArrowUpDown size={12} className="ml-1" />
-                  )}
-                </button>
-              </th>
-            </tr>
-          </thead>
-          <motion.tbody
-            variants={container}
-            initial="hidden"
-            animate="show"
-          >
-            {sortedRecipients.map((recipient) => (
-              <motion.tr 
-                key={recipient.timestamp} // Use timestamp as a unique key
-                className={`border-t border-gray-200 hover:bg-gray-50 ${
-                  recipient.amount === highestAmount ? 'bg-yellow-50' : ''
-                }`}
-                variants={item}
-              >
-                <td className="px-4 py-2.5 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <span className="font-medium text-gray-900 truncate max-w-[180px]">
-                      {recipient.name}
-                    </span>
-                    {recipient.amount === highestAmount && (
-                      <span className="ml-2 text-xs bg-gold text-primary-dark px-2 py-0.5 rounded-full whitespace-nowrap">
-                        Terhoki!
-                      </span>
+      {/* Table container with fixed max height for scrollability */}
+      <div className="overflow-y-auto max-h-80">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-gray-50">
+                <th className="px-4 py-2.5 text-left whitespace-nowrap w-1/3 sticky top-0 bg-gray-50">
+                  <button 
+                    className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
+                    onClick={() => handleSort('name')}
+                  >
+                    <User size={15} className="mr-1.5" />
+                    Nama
+                    {sortField === 'name' && (
+                      <ArrowUpDown size={12} className="ml-1" />
                     )}
-                  </div>
-                </td>
-                <td className="px-4 py-2.5 whitespace-nowrap">
-                  <span className={`font-medium ${
-                    recipient.amount === highestAmount 
-                      ? 'text-primary-dark' 
-                      : 'text-gray-900'
-                  }`}>
-                    {formatCurrency(recipient.amount)}
-                  </span>
-                </td>
-                <td className="px-4 py-2.5 text-sm text-gray-500 whitespace-nowrap">
-                  {formatDate(recipient.timestamp)}
-                </td>
-              </motion.tr>
-            ))}
-          </motion.tbody>
-        </table>
+                  </button>
+                </th>
+                <th className="px-4 py-2.5 text-left whitespace-nowrap w-1/4 sticky top-0 bg-gray-50">
+                  <button 
+                    className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
+                    onClick={() => handleSort('amount')}
+                  >
+                    <Wallet size={15} className="mr-1.5" />
+                    Jumlah
+                    {sortField === 'amount' && (
+                      <ArrowUpDown size={12} className="ml-1" />
+                    )}
+                  </button>
+                </th>
+                <th className="px-4 py-2.5 text-left whitespace-nowrap w-2/5 sticky top-0 bg-gray-50">
+                  <button 
+                    className="flex items-center text-sm font-medium text-gray-600 hover:text-primary"
+                    onClick={() => handleSort('timestamp')}
+                  >
+                    <Calendar size={15} className="mr-1.5" />
+                    Waktu
+                    {sortField === 'timestamp' && (
+                      <ArrowUpDown size={12} className="ml-1" />
+                    )}
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <motion.tbody
+              variants={container}
+              initial="hidden"
+              animate="show"
+            >
+              {sortedRecipients.map((recipient, index) => (
+                <motion.tr 
+                  key={recipient.timestamp} // Use timestamp as a unique key
+                  className={`border-t border-gray-200 hover:bg-gray-50 ${
+                    recipient.amount === highestAmount ? 'bg-yellow-50' : ''
+                  }`}
+                  variants={item}
+                >
+                  <td className="px-4 py-2.5 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <span className="font-medium text-gray-900 truncate max-w-[180px]">
+                        {recipient.name}
+                      </span>
+                      {recipient.amount === highestAmount && (
+                        <span className="ml-2 text-xs bg-gold text-primary-dark px-2 py-0.5 rounded-full whitespace-nowrap">
+                          Terhoki!
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2.5 whitespace-nowrap">
+                    <span className={`font-medium ${
+                      recipient.amount === highestAmount 
+                        ? 'text-primary-dark' 
+                        : 'text-gray-900'
+                    }`}>
+                      {formatCurrency(recipient.amount)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 text-sm text-gray-500 whitespace-nowrap">
+                    {formatDate(recipient.timestamp)}
+                  </td>
+                </motion.tr>
+              ))}
+            </motion.tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
